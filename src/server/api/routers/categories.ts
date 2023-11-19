@@ -115,4 +115,11 @@ export const catRouter = createTRPCRouter({
       });
       return !!found;
     }),
+  allNominations: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const found = await db.query.nominations.findMany({
+      where: (nominee) => eq(nominee.userId, userId),
+    });
+    return found;
+  }),
 });

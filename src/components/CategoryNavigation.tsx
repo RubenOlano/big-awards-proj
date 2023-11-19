@@ -3,10 +3,11 @@ import Link from "next/link";
 
 type Props = {
   cat: Category;
-  color?: string;
+  color: string;
+  disabled?: boolean;
 };
 
-export default function CategoryNavigation({ cat, color }: Props) {
+export default function CategoryNavigation({ cat, color, disabled }: Props) {
   return (
     <Link
       href={`/category/${cat.id}`}
@@ -14,10 +15,18 @@ export default function CategoryNavigation({ cat, color }: Props) {
     >
       <div className="flex items-center">
         <div
-          className="mr-2 h-8 w-8 rounded-full md:mr-3 md:h-10 md:w-10"
-          style={{ backgroundColor: color ? `#${color}` : undefined }}
+          className={`mr-2 h-8 w-8 rounded-full md:mr-3 md:h-10 md:w-10 ${
+            disabled ? "bg-gray-500" : ""
+          }`}
+          style={{
+            backgroundColor: !disabled ? `#${color}` : undefined,
+          }}
         />
-        <h1 className="truncate text-sm font-semibold text-white md:text-base">
+        <h1
+          className={`truncate text-sm font-semibold md:text-base ${
+            disabled ? "text-gray-500 line-through" : "text-white"
+          }`}
+        >
           {cat.attributes.title}
         </h1>
       </div>

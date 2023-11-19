@@ -26,14 +26,15 @@ export default function NominationForm({ cat, disabled }: Props) {
       }`}
     >
       <form
-        onSubmit={() =>
+        onSubmit={(e) => {
+          e.preventDefault();
           mutate({
             case: formData.reasoning,
             categoryId: cat.id.toString(),
             nominee: formData.nominee,
             catName: cat.attributes.title,
-          })
-        }
+          });
+        }}
       >
         <div className="text-center text-white">
           <h1 className="mb-4 text-4xl font-extrabold md:text-5xl">
