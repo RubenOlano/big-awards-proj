@@ -6,6 +6,7 @@ import {
   integer,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "@auth/core/adapters";
+import { sql } from "drizzle-orm";
 
 export const users = pgTable("user", {
   id: text("id").notNull().primaryKey(),
@@ -55,4 +56,24 @@ export const verificationTokens = pgTable(
   (vt) => ({
     compoundKey: primaryKey(vt.identifier, vt.token),
   }),
+);
+
+export const nominations = pgTable(
+  "nomination",
+  {
+    nominee: text("nominee").notNull(),
+    case: text("case").notNull(),
+    userId: text("userId")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("createdAt", { mode: "date" })
+      .notNull()
+      .default(sql`now()`),
+    categoryId: text("categoryId").notNull(),
+  },
+  (nominations) => {
+    return {
+      compoundKey: primaryKey(nominations.userId, nominations.categoryId),
+    };
+  },
 );

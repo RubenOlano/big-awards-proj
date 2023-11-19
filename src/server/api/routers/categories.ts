@@ -1,6 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { env } from "@/env.mjs";
+import { db } from "@/server/db";
+import { and, eq } from "drizzle-orm";
+import { nominations } from "@/server/db/schema";
 
 const categoryOutput = z.object({
   id: z.number(),
@@ -37,7 +40,10 @@ const byIdSchema = z.object({
 });
 
 const nomination = z.object({
-  id: z.string(),
+  nominee: z.string(),
+  case: z.string(),
+  categoryId: z.string(),
+  catName: z.string(),
 });
 
 export const catRouter = createTRPCRouter({
@@ -64,5 +70,49 @@ export const catRouter = createTRPCRouter({
       const parsed = categoryOutput.parse(data);
       return parsed;
     }),
-  // nominate: publicProcedure.input
+  nominate: protectedProcedure
+    .input(nomination)
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+      const found = await db.query.nominations.findFirst({
+        where: (nominee) =>
+          and(
+            eq(nominee.userId, userId),
+            eq(nominee.categoryId, input.categoryId),
+          ),
+      });
+      if (found) throw new Error("Already nominated");
+
+      const content = `Chatter ${
+        ctx.session.user.name ?? "Unknown"
+      } nominated ${input.nominee} for ${input.catName}`;
+
+      await fetch(env.DISCORD_WEBHOOK, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+        }),
+      });
+
+      await db.insert(nominations).values({
+        case: input.case,
+        nominee: input.nominee,
+        categoryId: input.categoryId,
+        userId,
+      });
+    }),
+  hasNominated: protectedProcedure
+    .input(byIdSchema)
+    .output(z.boolean())
+    .query(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+      const found = await db.query.nominations.findFirst({
+        where: (nominee) =>
+          and(eq(nominee.userId, userId), eq(nominee.categoryId, input.id)),
+      });
+      return !!found;
+    }),
 });

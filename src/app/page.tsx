@@ -6,5 +6,9 @@ export default async function Home() {
   const session = await getServerAuthSession();
   if (!session) redirect("/auth");
 
-  return <NominationsCard />;
+  return (
+    <div className="flex justify-center">
+      <NominationsCard />
+    </div>
+  );
 }
