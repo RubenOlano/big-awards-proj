@@ -1,3 +1,4 @@
+"use client";
 import { type Category } from "@/server/api/routers/categories";
 import Link from "next/link";
 
