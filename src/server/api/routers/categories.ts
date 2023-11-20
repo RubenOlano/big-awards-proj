@@ -48,6 +48,7 @@ const nomination = z.object({
 
 export const catRouter = createTRPCRouter({
   getGroups: publicProcedure.output(groupOutput.array()).query(async () => {
+    console.log("fetching groups");
     const res = await fetch(env.API_URL + "/api/category-groups?populate=*", {
       headers: {
         Authorization: "Bearer " + env.API_TOKEN,
