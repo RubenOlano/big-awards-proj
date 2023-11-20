@@ -53,6 +53,7 @@ export const catRouter = createTRPCRouter({
         Authorization: "Bearer " + env.API_TOKEN,
       },
     });
+    console.log(res);
     const { data } = (await res.json()) as unknown as { data: unknown };
     const parsed = groupOutput.array().parse(data);
     return parsed;
